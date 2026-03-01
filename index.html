@@ -1,26 +1,497 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QR Code Generator with Logo</title>
+    <title>Pro QR Code Generator - Axora</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Outfit:wght@700;800&family=Noto+Sans+Sinhala:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <h1>QR Code Generator</h1>
-      <input
-        type="text"
-        id="text"
-        placeholder="Enter text to generate QR code"
-      />
-      <input type="file" id="logo-input" accept="image/*" />
-      <button id="generate">Generate QR Code</button>
-      <div id="qrcode"></div>
-      <br />
-      <button id="download" style="display: none">Download QR Code</button>
+      <div class="settings-panel">
+        <h2><i class="fa-solid fa-qrcode"></i> QR Studio Pro</h2>
+
+        <div class="stepper-container">
+          <div class="step active" id="indicator-step-1">
+            <div class="step-icon"><i class="fa-solid fa-pen-nib"></i></div>
+            <span>1. Content</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="indicator-step-2">
+            <div class="step-icon"><i class="fa-solid fa-palette"></i></div>
+            <span>2. Design</span>
+          </div>
+        </div>
+
+        <div id="step-1-content" class="step-content active-step">
+          <div class="step-header">
+            <h3>Choose Data Type</h3>
+            <p>Select what you want to store in your QR Code.</p>
+          </div>
+
+          <div class="form-group">
+            <div class="type-selector" id="input-type-selector">
+              <button class="type-btn active" data-type="url">
+                <i class="fa-solid fa-link"></i> URL
+              </button>
+              <button class="type-btn" data-type="text">
+                <i class="fa-solid fa-align-left"></i> Text
+              </button>
+              <button class="type-btn" data-type="vcard">
+                <i class="fa-solid fa-address-card"></i> vCard
+              </button>
+              <button class="type-btn" data-type="wifi">
+                <i class="fa-solid fa-wifi"></i> Wi-Fi
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group" id="url-input-group">
+            <label>Website URL</label>
+            <input
+              type="text"
+              id="qr-url"
+              value="https://axora.com"
+              placeholder="https://example.com"
+            />
+          </div>
+
+          <div class="form-group" id="text-input-group" style="display: none">
+            <label>Message / Details</label>
+            <div class="text-editor">
+              <div class="text-toolbar">
+                <button id="tool-upper" title="Uppercase"><b>A</b></button>
+                <button id="tool-lower" title="Lowercase"><b>a</b></button>
+                <button id="tool-bullet" title="Add Bullet List">
+                  <i class="fa-solid fa-list-ul"></i>
+                </button>
+                <button id="tool-clear" title="Clear Text">
+                  <i class="fa-solid fa-eraser"></i>
+                </button>
+              </div>
+              <textarea
+                id="qr-text"
+                rows="4"
+                placeholder="Enter your text, contact details, or message here..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-group" id="vcard-input-group" style="display: none">
+            <label>Contact Details (Digital Business Card)</label>
+            <div class="vcard-grid">
+              <input type="text" id="vc-fname" placeholder="First Name *" />
+              <input type="text" id="vc-lname" placeholder="Last Name" />
+              <input type="text" id="vc-phone" placeholder="Mobile Number" />
+              <input type="text" id="vc-email" placeholder="Email Address" />
+              <input type="text" id="vc-company" placeholder="Company Name" />
+              <input type="text" id="vc-website" placeholder="Website" />
+            </div>
+          </div>
+
+          <div class="form-group" id="wifi-input-group" style="display: none">
+            <label>Wi-Fi Network Details</label>
+            <div style="display: flex; flex-direction: column; gap: 15px">
+              <input
+                type="text"
+                id="wifi-ssid"
+                placeholder="Network Name (SSID) *"
+              />
+              <input
+                type="text"
+                id="wifi-password"
+                placeholder="Password (Leave blank if none)"
+              />
+
+              <div style="display: flex; gap: 15px">
+                <div style="flex: 1">
+                  <label
+                    style="
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                      display: block;
+                      color: var(--text-gray);
+                    "
+                    >Encryption</label
+                  >
+                  <select
+                    id="wifi-encryption"
+                    class="size-select"
+                    style="padding: 10px"
+                  >
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">None (Open Network)</option>
+                  </select>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    align-items: flex-end;
+                    padding-bottom: 10px;
+                  "
+                >
+                  <label
+                    class="checkbox-label"
+                    style="cursor: pointer; font-size: 14px; margin: 0"
+                  >
+                    <input type="checkbox" id="wifi-hidden" /> Hidden Network
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button id="btn-next" class="btn btn-primary w-100 btn-large">
+              Next: Customize Design
+              <i class="fa-solid fa-arrow-right btn-icon-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="step-2-content" class="step-content" style="display: none">
+          <div class="step-header">
+            <h3>Customize Design</h3>
+            <p>Make your QR code stand out with colors and logos.</p>
+          </div>
+
+          <div class="form-group">
+            <label>Color & Background</label>
+            <div class="radio-group" style="margin-bottom: 10px">
+              <label class="radio-btn">
+                <input type="radio" name="colorMode" value="solid" checked />
+                Solid Color
+              </label>
+              <label class="radio-btn">
+                <input type="radio" name="colorMode" value="gradient" />
+                Gradient
+              </label>
+            </div>
+
+            <div
+              id="gradient-controls"
+              style="
+                display: none;
+                margin-bottom: 15px;
+                background: #f1f5f8;
+                padding: 10px;
+                border-radius: 8px;
+              "
+            >
+              <div class="radio-group" style="margin-bottom: 10px">
+                <label class="radio-btn">
+                  <input type="radio" name="gradType" value="linear" checked />
+                  Linear
+                </label>
+                <label class="radio-btn">
+                  <input type="radio" name="gradType" value="radial" /> Radial
+                </label>
+              </div>
+              <div id="angle-control">
+                <label style="font-size: 12px"
+                  >Gradient Angle: <span id="angle-val">45</span>°</label
+                >
+                <input
+                  type="range"
+                  id="grad-angle"
+                  min="0"
+                  max="360"
+                  value="45"
+                  style="width: 100%"
+                />
+              </div>
+              <div id="radial-control" style="display: none">
+                <label style="font-size: 12px"
+                  >Radial Spread: <span id="spread-val">100</span>%</label
+                >
+                <input
+                  type="range"
+                  id="grad-spread"
+                  min="10"
+                  max="100"
+                  value="100"
+                  style="width: 100%"
+                />
+              </div>
+            </div>
+
+            <div class="color-grid">
+              <div class="color-box">
+                <label>Main Color</label>
+                <input type="color" id="color1" value="#1a5276" />
+              </div>
+              <div
+                class="color-box"
+                id="gradient-color-container"
+                style="display: none"
+              >
+                <label>Gradient End</label>
+                <input type="color" id="color2" value="#e74c3c" />
+              </div>
+              <div class="color-box">
+                <label>Background</label>
+                <input type="color" id="bg-color" value="#ffffff" />
+              </div>
+            </div>
+            <label
+              class="checkbox-label"
+              style="
+                margin-top: 10px;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+              "
+            >
+              <input type="checkbox" id="transparent-bg" /> Make Background
+              Transparent
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Main Pattern Style</label>
+            <div class="visual-picker" id="dot-style-picker">
+              <button
+                class="style-btn active"
+                data-value="square"
+                title="Square"
+              >
+                <i class="fa-solid fa-square"></i>
+              </button>
+              <button class="style-btn" data-value="dots" title="Dots">
+                <i class="fa-solid fa-ellipsis"></i>
+              </button>
+              <button class="style-btn" data-value="rounded" title="Rounded">
+                <i class="fa-solid fa-circle"></i>
+              </button>
+              <button
+                class="style-btn"
+                data-value="extra-rounded"
+                title="Extra Rounded"
+              >
+                <i class="fa-brands fa-mendeley"></i>
+              </button>
+              <button class="style-btn" data-value="classy" title="Classy">
+                <i class="fa-solid fa-shapes"></i>
+              </button>
+              <button
+                class="style-btn"
+                data-value="classy-rounded"
+                title="Classy Rounded"
+              >
+                <i class="fa-solid fa-certificate"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Corner Markers Style (The 3 Big Squares)</label>
+            <div style="display: flex; gap: 15px">
+              <div style="flex: 1">
+                <label style="font-size: 12px">Outer Frame</label>
+                <div class="visual-picker" id="corner-square-picker">
+                  <button
+                    class="style-btn active"
+                    data-value="square"
+                    style="height: 40px"
+                  >
+                    <i class="fa-regular fa-square"></i>
+                  </button>
+                  <button
+                    class="style-btn"
+                    data-value="dot"
+                    style="height: 40px"
+                  >
+                    <i class="fa-regular fa-circle"></i>
+                  </button>
+                  <button
+                    class="style-btn"
+                    data-value="extra-rounded"
+                    style="height: 40px"
+                  >
+                    <i class="fa-solid fa-maximize"></i>
+                  </button>
+                </div>
+              </div>
+              <div style="flex: 1">
+                <label style="font-size: 12px">Inner Dot</label>
+                <div class="visual-picker" id="corner-dot-picker">
+                  <button
+                    class="style-btn active"
+                    data-value="square"
+                    style="height: 40px"
+                  >
+                    <i class="fa-solid fa-square"></i>
+                  </button>
+                  <button
+                    class="style-btn"
+                    data-value="dot"
+                    style="height: 40px"
+                  >
+                    <i class="fa-solid fa-circle"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Logo Integration</label>
+            <input
+              type="file"
+              id="logo-upload"
+              accept="image/*"
+              class="file-input"
+            />
+
+            <div
+              id="logo-border-controls"
+              style="
+                display: none;
+                margin-top: 10px;
+                background: #f9f9f9;
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #e1e8ed;
+              "
+            >
+              <label
+                style="
+                  font-size: 13px;
+                  font-weight: bold;
+                  margin-bottom: 8px;
+                  display: block;
+                "
+                >Logo Border Options</label
+              >
+              <div style="display: flex; gap: 15px; align-items: center">
+                <div style="flex: 1">
+                  <label style="font-size: 11px"
+                    >Width: <span id="border-width-val">0</span>px</label
+                  >
+                  <input
+                    type="range"
+                    id="logo-border-width"
+                    min="0"
+                    max="20"
+                    value="0"
+                    style="width: 100%; margin-top: 5px"
+                  />
+                </div>
+                <div style="width: 50px">
+                  <label style="font-size: 11px">Color</label>
+                  <input
+                    type="color"
+                    id="logo-border-color"
+                    value="#1a5276"
+                    style="height: 25px; border-radius: 4px; padding: 0"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              id="remove-logo"
+              class="btn btn-danger"
+              style="display: none; margin-top: 15px"
+            >
+              <i class="fa-solid fa-trash"></i> Remove Logo
+            </button>
+          </div>
+
+          <div
+            class="step-actions"
+            style="
+              margin-top: 30px;
+              border-top: 1px solid #eaeaea;
+              padding-top: 20px;
+            "
+          >
+            <button id="btn-back" class="btn btn-secondary">
+              <i class="fa-solid fa-arrow-left"></i> Back to Content
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <h3>Live Preview</h3>
+        <div id="canvas-container" class="checkerboard-bg">
+          <div id="canvas"></div>
+        </div>
+
+        <div class="download-section">
+          <div class="form-group" style="margin-bottom: 0">
+            <select id="download-size" class="size-select">
+              <option value="1080">HD (1080x1080)</option>
+              <option value="1920">FHD (1920x1920)</option>
+              <option value="3840">4K (3840x3840)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="downloadQR('png')">
+            <i class="fa-solid fa-download"></i> PNG
+          </button>
+          <button class="btn btn-secondary" onclick="downloadQR('svg')">
+            <i class="fa-solid fa-vector-square"></i> SVG
+          </button>
+        </div>
+      </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <div id="crop-modal" class="modal">
+      <div class="modal-content">
+        <h3>Design & Crop Logo</h3>
+        <div class="img-container">
+          <img id="image-to-crop" src="" />
+        </div>
+        <label style="margin-top: 15px; display: block; font-weight: bold"
+          >Select Logo Shape:</label
+        >
+        <div
+          class="visual-picker shape-picker"
+          id="crop-shape-picker"
+          style="margin-top: 10px"
+        >
+          <button class="style-btn active" data-value="square">
+            <i class="fa-solid fa-square"></i> Square
+          </button>
+          <button class="style-btn" data-value="circle">
+            <i class="fa-solid fa-circle"></i> Circle
+          </button>
+        </div>
+        <div
+          class="modal-actions"
+          style="margin-top: 20px; display: flex; gap: 10px"
+        >
+          <button id="crop-btn" class="btn btn-primary">
+            Apply Shape & Logo
+          </button>
+          <button id="close-modal" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
