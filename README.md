@@ -1,6 +1,6 @@
 # 🚀 Axora - Advanced Pro QR Code Generator
 
-Axora is a high-performance, professional-grade QR code generation tool designed for creators and businesses. Unlike standard generators, Axora provides a full suite of customization tools—including real-time previews, advanced styling, and logo integration—to create unique, brand-aligned QR codes in seconds.
+This is a state-of-the-art QR code creation tool that goes beyond a typical QR Code generator and includes all the features needed by professional designers and businesses. It allows the user to create beautiful QR codes while watching the changes they make live (Real-time Preview).
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
