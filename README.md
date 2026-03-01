@@ -5,6 +5,19 @@ This is a state-of-the-art QR code creation tool that goes beyond a typical QR C
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 
+---
+
+## 📸 Screenshots
+
+
+![Axora QR Generator UI](Screenshots/preview1.png)
+
+![Customizing Logo and Colors](Screenshots/preview2.png)
+
+![Customizing Logo and Colors](Screenshots/preview3.png)
+
+---
+
 ## ✨ Key Features
 
 * 🔗 **Versatile Data Support:**
