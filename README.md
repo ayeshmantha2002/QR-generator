@@ -46,7 +46,7 @@ Axora is a high-performance, professional-grade QR code generation tool designed
     git clone https://github.com/ayeshmantha2002/QR-generator.git
     ```
 2.  **Open the project:**
-    Simply open `qr.html` in any modern web browser. No local server or installation is required.
+    Simply open `index.html` in any modern web browser. No local server or installation is required.
 
 ## 🚀 How to Create a Pro QR Code
 
