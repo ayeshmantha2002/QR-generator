@@ -8,22 +8,26 @@ let currentCropShape = "square";
 let rawCroppedImage = new Image();
 let croppedImageBase64 = null;
 
+// Notice Default colors are set to Axora Brand Colors
 const qrCode = new QRCodeStyling({
   width: PREVIEW_SIZE,
   height: PREVIEW_SIZE,
   data: "https://axora.com",
   margin: 10,
   qrOptions: { errorCorrectionLevel: "H" },
-  dotsOptions: { color: "#1a5276", type: currentDotStyle },
-  cornersSquareOptions: { type: currentCornerSquareStyle, color: "#1a5276" },
-  cornersDotOptions: { type: currentCornerDotStyle, color: "#1a5276" },
+  dotsOptions: { color: "#273469", type: currentDotStyle },
+  cornersSquareOptions: {
+    type: currentCornerSquareStyle,
+    color: "#273469",
+  },
+  cornersDotOptions: { type: currentCornerDotStyle, color: "#273469" },
   backgroundOptions: { color: "#ffffff" },
   imageOptions: { crossOrigin: "anonymous", margin: 8, imageSize: 0.4 },
 });
 
 qrCode.append(document.getElementById("canvas"));
 
-// --- DOM Elements (Color, Gradient, Shapes) ---
+// --- DOM Elements ---
 const colorModes = document.getElementsByName("colorMode");
 const gradTypes = document.getElementsByName("gradType");
 const color1Input = document.getElementById("color1");
@@ -36,6 +40,7 @@ const gradientControls = document.getElementById("gradient-controls");
 const gradAngleSlider = document.getElementById("grad-angle");
 const angleValDisplay = document.getElementById("angle-val");
 const angleControlDiv = document.getElementById("angle-control");
+
 const gradSpreadSlider = document.getElementById("grad-spread");
 const spreadValDisplay = document.getElementById("spread-val");
 const radialControlDiv = document.getElementById("radial-control");
@@ -53,7 +58,6 @@ const logoBorderWidth = document.getElementById("logo-border-width");
 const logoBorderColor = document.getElementById("logo-border-color");
 const borderWidthValDisplay = document.getElementById("border-width-val");
 
-// --- DOM Elements for Input Types (URL, Text, vCard, Wi-Fi) ---
 const typeBtns = document.querySelectorAll(".type-btn");
 const urlInputGroup = document.getElementById("url-input-group");
 const textInputGroup = document.getElementById("text-input-group");
@@ -71,7 +75,6 @@ const vcCompany = document.getElementById("vc-company");
 const vcWebsite = document.getElementById("vc-website");
 const vcardInputs = [vcFname, vcLname, vcPhone, vcEmail, vcCompany, vcWebsite];
 
-// New Wi-Fi Inputs
 const wifiSsid = document.getElementById("wifi-ssid");
 const wifiPassword = document.getElementById("wifi-password");
 const wifiEncryption = document.getElementById("wifi-encryption");
@@ -79,10 +82,83 @@ const wifiHidden = document.getElementById("wifi-hidden");
 
 let currentInputType = "url";
 
+// --- Wizard Logic ---
+const btnNext = document.getElementById("btn-next");
+const btnBack = document.getElementById("btn-back");
+const step1Content = document.getElementById("step-1-content");
+const step2Content = document.getElementById("step-2-content");
+const indStep1 = document.getElementById("indicator-step-1");
+const indStep2 = document.getElementById("indicator-step-2");
+
+btnNext.addEventListener("click", () => {
+  let isValid = false;
+  if (currentInputType === "url") {
+    if (qrUrlInput.value.trim() !== "") {
+      isValid = true;
+      qrUrlInput.classList.remove("input-error");
+    } else {
+      qrUrlInput.classList.add("input-error");
+      qrUrlInput.focus();
+    }
+  } else if (currentInputType === "text") {
+    if (qrTextInput.value.trim() !== "") {
+      isValid = true;
+      qrTextInput.classList.remove("input-error");
+    } else {
+      qrTextInput.classList.add("input-error");
+      qrTextInput.focus();
+    }
+  } else if (currentInputType === "vcard") {
+    if (vcFname.value.trim() !== "") {
+      isValid = true;
+      vcFname.classList.remove("input-error");
+    } else {
+      vcFname.classList.add("input-error");
+      vcFname.focus();
+    }
+  } else if (currentInputType === "wifi") {
+    if (wifiSsid.value.trim() !== "") {
+      isValid = true;
+      wifiSsid.classList.remove("input-error");
+    } else {
+      wifiSsid.classList.add("input-error");
+      wifiSsid.focus();
+    }
+  }
+
+  if (isValid) {
+    step1Content.style.display = "none";
+    step2Content.style.display = "block";
+    indStep1.classList.remove("active");
+    indStep2.classList.add("active");
+    updateQR();
+  }
+});
+
+btnBack.addEventListener("click", () => {
+  step2Content.style.display = "none";
+  step1Content.style.display = "block";
+  indStep2.classList.remove("active");
+  indStep1.classList.add("active");
+});
+
+// Clear input errors
+qrUrlInput.addEventListener("input", () =>
+  qrUrlInput.classList.remove("input-error"),
+);
+qrTextInput.addEventListener("input", () =>
+  qrTextInput.classList.remove("input-error"),
+);
+vcFname.addEventListener("input", () =>
+  vcFname.classList.remove("input-error"),
+);
+wifiSsid.addEventListener("input", () =>
+  wifiSsid.classList.remove("input-error"),
+);
+
 // --- Real-Time Update Logic ---
 function updateQR() {
   let data = " ";
-
   if (currentInputType === "url") {
     data = qrUrlInput.value || " ";
   } else if (currentInputType === "text") {
@@ -96,7 +172,6 @@ function updateQR() {
     const w = vcWebsite.value.trim();
     data = `BEGIN:VCARD\nVERSION:3.0\nN:${l};${f};;;\nFN:${f} ${l}\nORG:${c}\nTEL;TYPE=CELL:${p}\nEMAIL:${e}\nURL:${w}\nEND:VCARD`;
   } else if (currentInputType === "wifi") {
-    // Generate Wi-Fi Format: WIFI:T:WPA;S:mynetwork;P:mypass;;
     const s = wifiSsid.value.trim();
     const p = wifiPassword.value.trim();
     const e = wifiEncryption.value;
@@ -136,7 +211,6 @@ function updateQR() {
       ctx.arc(center, center, center, 0, 2 * Math.PI);
       ctx.fillStyle = activeBgCol;
       ctx.fill();
-
       ctx.save();
       ctx.beginPath();
       ctx.arc(center, center, center - margin, 0, 2 * Math.PI);
@@ -149,7 +223,6 @@ function updateQR() {
         size - margin * 2,
       );
       ctx.restore();
-
       if (bWidth > 0) {
         ctx.beginPath();
         ctx.arc(center, center, center - margin, 0, 2 * Math.PI);
@@ -193,9 +266,8 @@ function updateQR() {
         { offset: gradSpread, color: color2 },
       ],
     };
-    if (gradType === "linear") {
+    if (gradType === "linear")
       gradientConfig.rotation = (gradAngle * Math.PI) / 180;
-    }
     options.dotsOptions.gradient = gradientConfig;
     options.cornersSquareOptions.gradient = gradientConfig;
     options.cornersDotOptions.gradient = gradientConfig;
@@ -207,11 +279,10 @@ function updateQR() {
     options.cornersDotOptions.color = color1;
     options.cornersDotOptions.gradient = null;
   }
-
   qrCode.update(options);
 }
 
-// --- Tab Switching Logic ---
+// --- UI Listeners ---
 typeBtns.forEach((btn) => {
   btn.addEventListener("click", (e) => {
     typeBtns.forEach((b) => b.classList.remove("active"));
@@ -223,9 +294,8 @@ typeBtns.forEach((btn) => {
       currentInputType === "text" ? "block" : "none";
     vcardInputGroup.style.display =
       currentInputType === "vcard" ? "block" : "none";
-    if (wifiInputGroup)
-      wifiInputGroup.style.display =
-        currentInputType === "wifi" ? "block" : "none";
+    wifiInputGroup.style.display =
+      currentInputType === "wifi" ? "block" : "none";
 
     updateQR();
   });
@@ -240,34 +310,36 @@ typeBtns.forEach((btn) => {
 if (wifiEncryption) wifiEncryption.addEventListener("change", updateQR);
 if (wifiHidden) wifiHidden.addEventListener("change", updateQR);
 
-// --- Text Formatting Tools ---
 const toolUpper = document.getElementById("tool-upper");
 const toolLower = document.getElementById("tool-lower");
 const toolBullet = document.getElementById("tool-bullet");
 const toolClear = document.getElementById("tool-clear");
 
-if (toolUpper && toolLower && toolBullet && toolClear) {
+if (toolUpper)
   toolUpper.addEventListener("click", () => {
     qrTextInput.value = qrTextInput.value.toUpperCase();
     updateQR();
   });
+if (toolLower)
   toolLower.addEventListener("click", () => {
     qrTextInput.value = qrTextInput.value.toLowerCase();
     updateQR();
   });
+if (toolBullet)
   toolBullet.addEventListener("click", () => {
     const currentText = qrTextInput.value;
-    qrTextInput.value = currentText === "" ? "• " : currentText + "\n• ";
+    const bullet = "• ";
+    qrTextInput.value =
+      currentText === "" ? bullet : currentText + "\n" + bullet;
     qrTextInput.focus();
     updateQR();
   });
+if (toolClear)
   toolClear.addEventListener("click", () => {
     qrTextInput.value = "";
     updateQR();
   });
-}
 
-// --- General UI Listeners ---
 logoBorderWidth.addEventListener("input", (e) => {
   borderWidthValDisplay.textContent = e.target.value;
   updateQR();
@@ -327,12 +399,11 @@ setupVisualPicker(cornerDotBtns, (val) => {
   currentCornerDotStyle = val;
   updateQR();
 });
-
 [color1Input, color2Input, bgColorInput].forEach((input) => {
   input.addEventListener("input", updateQR);
 });
 
-// --- Logo Cropping Setup ---
+// --- Cropper ---
 let cropper;
 const modal = document.getElementById("crop-modal");
 const imageToCrop = document.getElementById("image-to-crop");
@@ -375,11 +446,14 @@ logoUpload.addEventListener("change", (e) => {
 });
 
 document.getElementById("crop-btn").addEventListener("click", () => {
-  const squareCanvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+  const squareCanvas = cropper.getCroppedCanvas({
+    width: 300,
+    height: 300,
+  });
   rawCroppedImage.onload = () => {
     updateQR();
     modal.style.display = "none";
-    removeLogoBtn.style.display = "inline-flex";
+    removeLogoBtn.style.display = "block";
     logoBorderControls.style.display = "block";
   };
   rawCroppedImage.src = squareCanvas.toDataURL("image/png");
@@ -389,7 +463,6 @@ document.getElementById("close-modal").addEventListener("click", () => {
   modal.style.display = "none";
   logoUpload.value = "";
 });
-
 removeLogoBtn.addEventListener("click", () => {
   rawCroppedImage = new Image();
   croppedImageBase64 = null;
@@ -401,18 +474,23 @@ removeLogoBtn.addEventListener("click", () => {
   logoUpload.value = "";
 });
 
-// --- Download Function ---
+// --- Download ---
 function downloadQR(extension) {
   const size = parseInt(document.getElementById("download-size").value);
   const exportBgColor = transparentBgCheck.checked
     ? "rgba(0,0,0,0)"
     : bgColorInput.value;
-
   qrCode.update({
     width: size,
     height: size,
     backgroundOptions: { color: exportBgColor },
   });
+
+  // Show a brief loading state on button
+  const btn = event.currentTarget;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
   qrCode
     .download({ name: `Axora-Pro-QR-${size}p`, extension: extension })
     .then(() => {
@@ -421,88 +499,6 @@ function downloadQR(extension) {
         height: PREVIEW_SIZE,
         backgroundOptions: { color: exportBgColor },
       });
+      btn.innerHTML = originalText;
     });
 }
-
-// --- Wizard & Step Navigation Logic ---
-const btnNext = document.getElementById("btn-next");
-const btnBack = document.getElementById("btn-back");
-const step1Content = document.getElementById("step-1-content");
-const step2Content = document.getElementById("step-2-content");
-const indStep1 = document.getElementById("indicator-step-1");
-const indStep2 = document.getElementById("indicator-step-2");
-
-if (btnNext) {
-  btnNext.addEventListener("click", () => {
-    let isValid = false;
-
-    if (currentInputType === "url") {
-      if (qrUrlInput.value.trim() !== "") {
-        isValid = true;
-        qrUrlInput.classList.remove("input-error");
-      } else {
-        qrUrlInput.classList.add("input-error");
-        qrUrlInput.focus();
-      }
-    } else if (currentInputType === "text") {
-      if (qrTextInput.value.trim() !== "") {
-        isValid = true;
-        qrTextInput.classList.remove("input-error");
-      } else {
-        qrTextInput.classList.add("input-error");
-        qrTextInput.focus();
-      }
-    } else if (currentInputType === "vcard") {
-      if (vcFname && vcFname.value.trim() !== "") {
-        isValid = true;
-        vcFname.classList.remove("input-error");
-      } else {
-        vcFname.classList.add("input-error");
-        vcFname.focus();
-      }
-    } else if (currentInputType === "wifi") {
-      // Wi-Fi Validation: Network Name (SSID) is required
-      if (wifiSsid && wifiSsid.value.trim() !== "") {
-        isValid = true;
-        wifiSsid.classList.remove("input-error");
-      } else {
-        wifiSsid.classList.add("input-error");
-        wifiSsid.focus();
-      }
-    }
-
-    if (isValid) {
-      step1Content.style.display = "none";
-      step2Content.style.display = "block";
-      indStep1.classList.remove("active");
-      indStep2.classList.add("active");
-      updateQR();
-    }
-  });
-}
-
-if (btnBack) {
-  btnBack.addEventListener("click", () => {
-    step2Content.style.display = "none";
-    step1Content.style.display = "block";
-    indStep2.classList.remove("active");
-    indStep1.classList.add("active");
-  });
-}
-
-if (qrUrlInput)
-  qrUrlInput.addEventListener("input", () =>
-    qrUrlInput.classList.remove("input-error"),
-  );
-if (qrTextInput)
-  qrTextInput.addEventListener("input", () =>
-    qrTextInput.classList.remove("input-error"),
-  );
-if (vcFname)
-  vcFname.addEventListener("input", () =>
-    vcFname.classList.remove("input-error"),
-  );
-if (wifiSsid)
-  wifiSsid.addEventListener("input", () =>
-    wifiSsid.classList.remove("input-error"),
-  );
